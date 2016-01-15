@@ -10,7 +10,10 @@ import java.util.Random;
 import com.example.flagquizgame.R;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.res.AssetManager;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -29,6 +32,7 @@ public class FlagQuizGame extends Activity {
 
 	private static final String TAG = "FlagQuizGame";
 	private int questionNumber = 0;
+	private int numberOfCorrectAnswers = 0;
 	private TextView questionNumberTextView;
 	private ImageView flagImageView;
 	private List<String> flagImageNameList = new ArrayList<String>();
@@ -36,6 +40,20 @@ public class FlagQuizGame extends Activity {
 	private String[] imageFilePaths;
 	private String correctAnswer;
 	private Handler handler;
+	private final OnDismissListener onDismissListener = new OnDismissListener() {
+		@Override
+		public void onDismiss(DialogInterface dialog) {
+			Log.i("onDismiss()", "onDismiss()");
+			resetQuiz();
+			loadNextQuestion();
+		}
+	};
+	private OnClickListener answerClickListener = new OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			submitAnswer((Button) v);
+		}
+	};
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -78,24 +96,22 @@ public class FlagQuizGame extends Activity {
 		LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		Button optionButton1 = (Button) inflater.inflate(R.layout.option_button, null);
 		optionButton1.setText(text);
-		optionButton1.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				submitAnswer((Button) v);
-			}
-		});
+		optionButton1.setOnClickListener(answerClickListener);
 		return optionButton1;
 	}
 
 	private void submitAnswer(Button submittedAnswerButton) {
 		String guess = submittedAnswerButton.getText().toString();
+		removeClickablilityFromAllAnswerOptionButtons();
 		submittedAnswerButton.setEnabled(false);
 		if (guess.equals(correctAnswer)) {
+			numberOfCorrectAnswers++;
 			displayResultAsCorrect();
 		}else {
 			displayResultAsWrong();
 		}
 		if(questionNumber == 10) {
+			alertDialog();
 			return;
 		}
 		handler.postDelayed(new Runnable() {
@@ -104,6 +120,16 @@ public class FlagQuizGame extends Activity {
 				loadNextQuestion();
 			}
 		}, 1000);
+	}
+
+	private void alertDialog() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(FlagQuizGame.this);
+		builder.setTitle("Final Score");
+		builder.setMessage("Your got " + numberOfCorrectAnswers + " right out of 10.");
+
+		AlertDialog dialog = builder.create();
+		dialog.setOnDismissListener(onDismissListener);
+		dialog.show();
 	}
 
 	private void displayResultAsWrong() {
@@ -132,6 +158,12 @@ public class FlagQuizGame extends Activity {
 		TableLayout buttonTableLayout = buttonTableLayout();
 		for (int row = 0; row < buttonTableLayout.getChildCount(); ++row)
 			((TableRow) buttonTableLayout.getChildAt(row)).removeAllViews();
+	}
+
+	private void removeClickablilityFromAllAnswerOptionButtons() {
+		TableLayout buttonTableLayout = buttonTableLayout();
+		for (int row = 0; row < buttonTableLayout.getChildCount(); ++row)
+			((TableRow) buttonTableLayout.getChildAt(row)).setClickable(false);
 	}
 
 	private String pickIncorrectCountryName() {
@@ -164,6 +196,8 @@ public class FlagQuizGame extends Activity {
 	}
 
 	private void resetQuiz() {
+		Log.i("resetQuiz()", "resetQuiz()");
+		numberOfCorrectAnswers = 0;
 		questionNumber = 0;
 		reLoadFlagImageNameList();
 		reloadQuizQuestions();
