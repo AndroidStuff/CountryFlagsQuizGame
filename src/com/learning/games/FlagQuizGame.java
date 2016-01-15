@@ -92,15 +92,18 @@ public class FlagQuizGame extends Activity {
 		submittedAnswerButton.setEnabled(false);
 		if (guess.equals(correctAnswer)) {
 			displayResultAsCorrect();
-			handler.postDelayed(new Runnable() {
-				@Override
-				public void run() {
-					loadNextQuestion();
-				}
-			}, 1000);
 		}else {
 			displayResultAsWrong();
 		}
+		if(questionNumber == 10) {
+			return;
+		}
+		handler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				loadNextQuestion();
+			}
+		}, 1000);
 	}
 
 	private void displayResultAsWrong() {
