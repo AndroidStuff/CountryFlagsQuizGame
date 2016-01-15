@@ -14,6 +14,7 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,6 +35,7 @@ public class FlagQuizGame extends Activity {
 	private List<String> quizQuestionsList = new ArrayList<String>();
 	private String[] imageFilePaths;
 	private String correctAnswer;
+	private Handler handler;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -42,6 +44,8 @@ public class FlagQuizGame extends Activity {
 		if(savedInstanceState != null) {
 			questionNumber = savedInstanceState.getInt("questionNumber");
 		}
+
+		handler = new Handler();
 		flagImageView = (ImageView) findViewById(R.id.flagImageView);
 		resetQuiz();
 		loadNextQuestion();
@@ -85,10 +89,15 @@ public class FlagQuizGame extends Activity {
 
 	private void submitAnswer(Button submittedAnswerButton) {
 		String guess = submittedAnswerButton.getText().toString();
-		//submittedAnswerButton.setEnabled(false);
+		submittedAnswerButton.setEnabled(false);
 		if (guess.equals(correctAnswer)) {
 			displayResultAsCorrect();
-			loadNextQuestion();
+			handler.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					loadNextQuestion();
+				}
+			}, 1000);
 		}else {
 			displayResultAsWrong();
 		}
