@@ -28,6 +28,7 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import butterknife.Bind;
+import butterknife.BindColor;
 import butterknife.ButterKnife;
 
 public class FlagQuizGame extends Activity {
@@ -43,7 +44,6 @@ public class FlagQuizGame extends Activity {
 	private final OnDismissListener onDismissListener = new OnDismissListener() {
 		@Override
 		public void onDismiss(DialogInterface dialog) {
-			Log.i("onDismiss()", "onDismiss()");
 			resetQuiz();
 			loadNextQuestion();
 		}
@@ -59,6 +59,8 @@ public class FlagQuizGame extends Activity {
 	@Bind(R.id.buttonTableLayout) TableLayout buttonTableLayout;
 	@Bind(R.id.questionNumberTextView) TextView questionNumberTextView;
 	@Bind(R.id.flagImageView) ImageView flagImageView;
+	@BindColor(R.color.incorrect_answer) int COLOR_INCORRECT_ANSWER;
+	@BindColor(R.color.correct_answer) int COLOR_CORRECT_ANSWER;
 
 
 	@Override
@@ -143,12 +145,12 @@ public class FlagQuizGame extends Activity {
 
 	private void displayResultAsWrong() {
 		resultBox.setText("Wrong!");
-		resultBox.setTextColor(getResources().getColor(R.color.incorrect_answer));
+		resultBox.setTextColor(COLOR_INCORRECT_ANSWER);
 	}
 
 	private void displayResultAsCorrect() {
 		resultBox.setText("Correct!");
-		resultBox.setTextColor(getResources().getColor(R.color.correct_answer));
+		resultBox.setTextColor(COLOR_CORRECT_ANSWER);
 	}
 
 	private List<String> answerOptions() {
