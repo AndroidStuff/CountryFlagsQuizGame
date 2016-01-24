@@ -33,8 +33,6 @@ public class FlagQuizGame extends Activity {
 	private static final String TAG = "FlagQuizGame";
 	private int questionNumber = 0;
 	private int numberOfCorrectAnswers = 0;
-	private TextView questionNumberTextView;
-	private ImageView flagImageView;
 	private List<String> flagImageNameList = new ArrayList<String>();
 	private List<String> quizQuestionsList = new ArrayList<String>();
 	private String[] imageFilePaths;
@@ -54,6 +52,13 @@ public class FlagQuizGame extends Activity {
 			submitAnswer((Button) v);
 		}
 	};
+
+	private TextView resultBox;
+	private TableLayout buttonTableLayout;
+	private TextView questionNumberTextView;
+	private ImageView flagImageView;
+
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -64,9 +69,17 @@ public class FlagQuizGame extends Activity {
 		}
 
 		handler = new Handler();
-		flagImageView = (ImageView) findViewById(R.id.flagImageView);
+		initUIReferences();
+
 		resetQuiz();
 		loadNextQuestion();
+	}
+
+	private void initUIReferences() {
+		questionNumberTextView = (TextView) findViewById(R.id.questionNumberTextView);
+		flagImageView = (ImageView) findViewById(R.id.flagImageView);
+		buttonTableLayout = (TableLayout) findViewById(R.id.buttonTableLayout);
+		resultBox = (TextView) findViewById(R.id.resultTextView);
 	}
 
 	private void loadNextQuestion() {
@@ -86,7 +99,7 @@ public class FlagQuizGame extends Activity {
 		List<String> shuffledCountryNames = answerOptions();
 		Log.i("ANSWER_OPTIONS", shuffledCountryNames.get(0) + "," + shuffledCountryNames.get(1) + ","  + shuffledCountryNames.get(2));
 
-		TableRow row = (TableRow) buttonTableLayout().getChildAt(0);
+		TableRow row = (TableRow) buttonTableLayout.getChildAt(0);
 		row.addView(newOptionButton(shuffledCountryNames.get(0)));
 		row.addView(newOptionButton(shuffledCountryNames.get(1)));
 		row.addView(newOptionButton(shuffledCountryNames.get(2)));
@@ -133,19 +146,13 @@ public class FlagQuizGame extends Activity {
 	}
 
 	private void displayResultAsWrong() {
-		TextView resultBox = resultBox();
 		resultBox.setText("Wrong!");
 		resultBox.setTextColor(getResources().getColor(R.color.incorrect_answer));
 	}
 
 	private void displayResultAsCorrect() {
-		TextView resultBox = resultBox();
 		resultBox.setText("Correct!");
 		resultBox.setTextColor(getResources().getColor(R.color.correct_answer));
-	}
-
-	private TableLayout buttonTableLayout() {
-		return (TableLayout) findViewById(R.id.buttonTableLayout);
 	}
 
 	private List<String> answerOptions() {
@@ -155,13 +162,11 @@ public class FlagQuizGame extends Activity {
 	}
 
 	private void removeOldAnswerOptionButtons() {
-		TableLayout buttonTableLayout = buttonTableLayout();
 		for (int row = 0; row < buttonTableLayout.getChildCount(); ++row)
 			((TableRow) buttonTableLayout.getChildAt(row)).removeAllViews();
 	}
 
 	private void removeClickablilityFromAllAnswerOptionButtons() {
-		TableLayout buttonTableLayout = buttonTableLayout();
 		for (int row = 0; row < buttonTableLayout.getChildCount(); ++row)
 			((TableRow) buttonTableLayout.getChildAt(row)).setClickable(false);
 	}
@@ -181,7 +186,6 @@ public class FlagQuizGame extends Activity {
 
 	private void incrementQuestionNumberAndUpdateTitle() {
 		questionNumber++;
-		questionNumberTextView = (TextView) findViewById(R.id.questionNumberTextView);
 		questionNumberTextView.setText("Question " + questionNumber + "of 10.");
 	}
 
@@ -204,11 +208,7 @@ public class FlagQuizGame extends Activity {
 	}
 
 	private void clearResultBox() {
-		resultBox().setText("");
-	}
-
-	private TextView resultBox() {
-		return (TextView) findViewById(R.id.resultTextView);
+		resultBox.setText("");
 	}
 
 	private void reloadQuizQuestions() {
