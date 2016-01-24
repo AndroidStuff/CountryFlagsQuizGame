@@ -27,6 +27,8 @@ import android.widget.ImageView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import butterknife.Bind;
+import butterknife.ButterKnife;
 
 public class FlagQuizGame extends Activity {
 
@@ -53,33 +55,27 @@ public class FlagQuizGame extends Activity {
 		}
 	};
 
-	private TextView resultBox;
-	private TableLayout buttonTableLayout;
-	private TextView questionNumberTextView;
-	private ImageView flagImageView;
+	@Bind(R.id.resultTextView) TextView resultBox;
+	@Bind(R.id.buttonTableLayout) TableLayout buttonTableLayout;
+	@Bind(R.id.questionNumberTextView) TextView questionNumberTextView;
+	@Bind(R.id.flagImageView) ImageView flagImageView;
 
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_flag_quiz_game);
+		ButterKnife.setDebug(true);
+		ButterKnife.bind(this);
 
 		if(savedInstanceState != null) {
 			questionNumber = savedInstanceState.getInt("questionNumber");
 		}
 
 		handler = new Handler();
-		initUIReferences();
 
 		resetQuiz();
 		loadNextQuestion();
-	}
-
-	private void initUIReferences() {
-		questionNumberTextView = (TextView) findViewById(R.id.questionNumberTextView);
-		flagImageView = (ImageView) findViewById(R.id.flagImageView);
-		buttonTableLayout = (TableLayout) findViewById(R.id.buttonTableLayout);
-		resultBox = (TextView) findViewById(R.id.resultTextView);
 	}
 
 	private void loadNextQuestion() {
