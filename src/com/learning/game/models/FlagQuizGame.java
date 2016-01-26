@@ -12,7 +12,7 @@ import android.util.Log;
 
 public class FlagQuizGame {
 	private static final String TAG = "FlagQuizGame";
-	private Context appContext;
+	private Context mAppContext;
 	private int correctAnswersCount;
 	private String currentImage;
 	private int currentQuestionNumber;
@@ -25,7 +25,7 @@ public class FlagQuizGame {
 			int numberOfCorrectAnswers,
 			List<String> flagImageNameList,
 			List<String> quizQuestionsList) {
-		this.appContext = context.getApplicationContext();
+		this.mAppContext = context.getApplicationContext();
 		this.currentQuestionNumber = questionNumber;
 		this.correctAnswersCount = numberOfCorrectAnswers;
 		this.flagImageNameList = flagImageNameList;
@@ -115,7 +115,7 @@ public class FlagQuizGame {
 	private void reLoadFlagImageNameList() {
 		flagImageNameList.clear();
 
-		final AssetManager assets = appContext.getAssets();
+		final AssetManager assets = mAppContext.getAssets();
 		imageFilePaths = fetchImageFilePaths(assets);
 		addToFlagImageNames(imageFilePaths);
 	}
