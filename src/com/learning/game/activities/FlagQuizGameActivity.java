@@ -1,20 +1,17 @@
-package com.learning.games;
+package com.learning.game.activities;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
 import com.example.flagquizgame.R;
+import com.learning.game.models.FlagQuizGame;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
-import android.content.res.AssetManager;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -31,20 +28,15 @@ import butterknife.Bind;
 import butterknife.BindColor;
 import butterknife.ButterKnife;
 
-public class FlagQuizGame extends Activity {
+public class FlagQuizGameActivity extends Activity {
 
-	private static final String TAG = "FlagQuizGame";
-	private int questionNumber = 0;
-	private int numberOfCorrectAnswers = 0;
-	private List<String> flagImageNameList = new ArrayList<String>();
-	private List<String> quizQuestionsList = new ArrayList<String>();
-	private String[] imageFilePaths;
-	private String correctAnswer;
+	private static final String TAG = "FlagQuizGameActivity";
+	private FlagQuizGame flagQuizGame;
 	private Handler handler;
 	private final OnDismissListener onDismissListener = new OnDismissListener() {
 		@Override
 		public void onDismiss(DialogInterface dialog) {
-			resetQuiz();
+			flagQuizGame.resetQuiz();
 			loadNextQuestion();
 		}
 	};
@@ -71,30 +63,27 @@ public class FlagQuizGame extends Activity {
 		ButterKnife.bind(this);
 
 		if(savedInstanceState != null) {
-			questionNumber = savedInstanceState.getInt("questionNumber");
+			flagQuizGame.setCurrentQuestionNumber(savedInstanceState.getInt("questionNumber"));
 		}
 
 		handler = new Handler();
-
-		resetQuiz();
+		flagQuizGame = new FlagQuizGame(getApplicationContext(), 0, 0, new ArrayList<String>(), new ArrayList<String>());
+		flagQuizGame.resetQuiz();
 		loadNextQuestion();
 	}
 
 	private void loadNextQuestion() {
 		clearResultBox();
-		final String nextImage = quizQuestionsList.remove(0);
-		correctAnswer = deriveCountryName(nextImage);
-		Log.i("CORRECT_ANSWER", correctAnswer);
-
+		flagQuizGame.nextImage();
 		removeOldAnswerOptionButtons();
 		addNewAnswerOptionButtons();
-		loadFlag(nextImage);
+		loadFlag(flagQuizGame.getCurrentImage());
 
 		incrementQuestionNumberAndUpdateTitle();
 	}
 
 	private void addNewAnswerOptionButtons() {
-		List<String> shuffledCountryNames = answerOptions();
+		List<String> shuffledCountryNames = flagQuizGame.answerOptions();
 		Log.i("ANSWER_OPTIONS", shuffledCountryNames.get(0) + "," + shuffledCountryNames.get(1) + ","  + shuffledCountryNames.get(2));
 
 		TableRow row = (TableRow) buttonTableLayout.getChildAt(0);
@@ -115,13 +104,13 @@ public class FlagQuizGame extends Activity {
 		String guess = submittedAnswerButton.getText().toString();
 		removeClickablilityFromAllAnswerOptionButtons();
 		submittedAnswerButton.setEnabled(false);
-		if (guess.equals(correctAnswer)) {
-			numberOfCorrectAnswers++;
+		if (guess.equals(flagQuizGame.correctAnswer())) {
+			flagQuizGame.incrementCorrectAnswersCount();
 			displayResultAsCorrect();
 		}else {
 			displayResultAsWrong();
 		}
-		if(questionNumber == 10) {
+		if(flagQuizGame.getCurrentQuestionNumber() == 10) {
 			alertDialog();
 			return;
 		}
@@ -134,9 +123,9 @@ public class FlagQuizGame extends Activity {
 	}
 
 	private void alertDialog() {
-		AlertDialog.Builder builder = new AlertDialog.Builder(FlagQuizGame.this);
+		AlertDialog.Builder builder = new AlertDialog.Builder(FlagQuizGameActivity.this);
 		builder.setTitle("Final Score");
-		builder.setMessage("Your got " + numberOfCorrectAnswers + " right out of 10.");
+		builder.setMessage("Your got " + flagQuizGame.getCorrectAnswersCount() + " right out of 10.");
 
 		AlertDialog dialog = builder.create();
 		dialog.setOnDismissListener(onDismissListener);
@@ -153,12 +142,6 @@ public class FlagQuizGame extends Activity {
 		resultBox.setTextColor(COLOR_CORRECT_ANSWER);
 	}
 
-	private List<String> answerOptions() {
-		List<String> shuffledCountryNames = Arrays.asList(new String[] {correctAnswer, pickIncorrectCountryName(), pickIncorrectCountryName()});
-		Collections.shuffle(shuffledCountryNames);
-		return shuffledCountryNames;
-	}
-
 	private void removeOldAnswerOptionButtons() {
 		for (int row = 0; row < buttonTableLayout.getChildCount(); ++row)
 			((TableRow) buttonTableLayout.getChildAt(row)).removeAllViews();
@@ -169,22 +152,9 @@ public class FlagQuizGame extends Activity {
 			((TableRow) buttonTableLayout.getChildAt(row)).setClickable(false);
 	}
 
-	private String pickIncorrectCountryName() {
-		String countryName = null;
-		while(true) {
-			countryName = deriveCountryName(randomFlag());
-			if(! correctAnswer.equalsIgnoreCase(countryName)) break;
-		}
-		return countryName;
-	}
-
-	private String deriveCountryName(final String nextImage) {
-		return nextImage.substring(nextImage.indexOf("-")+1);
-	}
-
 	private void incrementQuestionNumberAndUpdateTitle() {
-		questionNumber++;
-		questionNumberTextView.setText("Question " + questionNumber + "of 10.");
+		flagQuizGame.incrementCurrentQuestionNmber();
+		questionNumberTextView.setText("Question " + flagQuizGame.getCurrentQuestionNumber() + "of 10.");
 	}
 
 	private void loadFlag(String nextImage) {
@@ -197,55 +167,8 @@ public class FlagQuizGame extends Activity {
 		}
 	}
 
-	private void resetQuiz() {
-		Log.i("resetQuiz()", "resetQuiz()");
-		numberOfCorrectAnswers = 0;
-		questionNumber = 0;
-		reLoadFlagImageNameList();
-		reloadQuizQuestions();
-	}
-
 	private void clearResultBox() {
 		resultBox.setText("");
 	}
 
-	private void reloadQuizQuestions() {
-		final int MAX_QUESTIONS = 10;
-		for(int i=0; i< MAX_QUESTIONS;) {
-			final String flagName = randomFlag();
-			if(! quizQuestionsList.contains(flagName)) {
-				quizQuestionsList.add(flagName);
-				i++;
-			}
-		}
-	}
-
-	private String randomFlag() {
-		Random random = new Random();
-		int flagIndex = random.nextInt(flagImageNameList.size());
-		return flagImageNameList.get(flagIndex);
-	}
-
-	private void reLoadFlagImageNameList() {
-		flagImageNameList.clear();
-
-		final AssetManager assets = getAssets();
-		imageFilePaths = fetchImageFilePaths(assets);
-		addToFlagImageNames(imageFilePaths);
-	}
-
-	private void addToFlagImageNames(String[] imageFilePaths) {
-		for (String path : imageFilePaths) {
-			flagImageNameList.add(path.replace(".png", ""));
-		}
-	}
-
-	private String[] fetchImageFilePaths(final AssetManager assets) {
-		try {
-			return assets.list("asia");
-		} catch (IOException e) {
-			Log.e(TAG, "Error loading image file names ", e);
-			return new String[0];
-		}
-	}
 }
