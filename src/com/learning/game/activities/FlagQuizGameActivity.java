@@ -84,7 +84,7 @@ public class FlagQuizGameActivity extends Activity {
 
 	private void addNewAnswerOptionButtons() {
 		List<String> shuffledCountryNames = flagQuizGame.answerOptions();
-		Log.i("ANSWER_OPTIONS", shuffledCountryNames.get(0) + "," + shuffledCountryNames.get(1) + ","  + shuffledCountryNames.get(2));
+		Log.d("ANSWER_OPTIONS", shuffledCountryNames.get(0) + "," + shuffledCountryNames.get(1) + ","  + shuffledCountryNames.get(2));
 
 		TableRow row = (TableRow) buttonTableLayout.getChildAt(0);
 		row.addView(newOptionButton(shuffledCountryNames.get(0)));

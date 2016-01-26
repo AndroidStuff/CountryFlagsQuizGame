@@ -13,7 +13,6 @@ import android.util.Log;
 public class FlagQuizGame {
 	private static final String TAG = "FlagQuizGame";
 	private Context appContext;
-	private String correctAnswer;
 	private int correctAnswersCount;
 	private String currentImage;
 	private int currentQuestionNumber;
@@ -35,7 +34,8 @@ public class FlagQuizGame {
 
 	public List<String> answerOptions() {
 		List<String> shuffledCountryNames =
-				Arrays.asList(new String[] {getCorrectAnswer(), pickIncorrectCountryName(), pickIncorrectCountryName()});
+				Arrays.asList(new String[] {correctAnswer(), pickIncorrectCountryName(), pickIncorrectCountryName()});
+		Log.d("ANSWER_OPTIONS", shuffledCountryNames.get(0) + "," + shuffledCountryNames.get(1) + ","  + shuffledCountryNames.get(2));
 		Collections.shuffle(shuffledCountryNames);
 		return shuffledCountryNames;
 	}
@@ -46,10 +46,6 @@ public class FlagQuizGame {
 
 	public String deriveCountryName(final String nextImage) {
 		return nextImage.substring(nextImage.indexOf("-")+1);
-	}
-
-	public String getCorrectAnswer() {
-		return correctAnswer;
 	}
 
 	public int getCorrectAnswersCount() {
@@ -86,6 +82,7 @@ public class FlagQuizGame {
 
 	public String nextImage() {
 		currentImage = quizQuestionsList.remove(0);
+		Log.d("currentImage", currentImage);
 		return currentImage;
 	}
 
@@ -94,10 +91,6 @@ public class FlagQuizGame {
 		currentQuestionNumber = 0;
 		reLoadFlagImageNameList();
 		reloadQuizQuestions();
-	}
-
-	public void setCurrentImage(String currentImage) {
-		this.currentImage = currentImage;
 	}
 
 	public void setCurrentQuestionNumber(int questionNumber) {
