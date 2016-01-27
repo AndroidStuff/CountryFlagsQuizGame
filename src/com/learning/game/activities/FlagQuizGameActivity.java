@@ -12,6 +12,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -66,6 +67,7 @@ public class FlagQuizGameActivity extends Activity {
 			flagQuizGame.setCurrentQuestionNumber(savedInstanceState.getInt("questionNumber"));
 		}
 
+		flagImageView.setBackgroundColor(Color.TRANSPARENT);//getBackground().setAlpha(100);
 		handler = new Handler();
 		flagQuizGame = new FlagQuizGame(getApplicationContext(), 0, 0, new ArrayList<String>(), new ArrayList<String>());
 		flagQuizGame.resetQuiz();
@@ -73,13 +75,26 @@ public class FlagQuizGameActivity extends Activity {
 	}
 
 	private void loadNextQuestion() {
-		clearResultBox();
-		flagQuizGame.nextImage();
-		removeOldAnswerOptionButtons();
-		addNewAnswerOptionButtons();
-		loadFlag(flagQuizGame.getCurrentImage());
+		clearStaleData();
+		publishNewData();
+	}
 
+	private void publishNewData() {
 		incrementQuestionNumberAndUpdateTitle();
+		handler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				flagQuizGame.nextImage();
+				addNewAnswerOptionButtons();
+				loadFlag(flagQuizGame.getCurrentImage());
+			}
+		}, 1000);
+	}
+
+	private void clearStaleData() {
+		clearResultBox();
+		removeOldAnswerOptionButtons();
+		flagImageView.setImageDrawable(null);
 	}
 
 	private void addNewAnswerOptionButtons() {
